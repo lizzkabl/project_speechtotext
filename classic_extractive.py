@@ -29,7 +29,7 @@ SBERT_CONFIG = {
         "get_spans": {"@span_getters": "spacy-transformers.sent_spans.v1"},
     }
 }
-
+nlp=build_classic_nlp_pipeline()
 
 def build_classic_nlp_pipeline():
     stanza.download('ru')
@@ -44,16 +44,12 @@ class SentenceTextRank:
         self.sentences = [sent for sent in doc.sents]
 
     def _sentence_rank(self, sentence_vectors):
-        """Rank sentences by importance.
-
-        Takes a list of sentence_vectors and computes pair-wise cosine similarity
-        between all sentences. A graph is constructed with the sentence_vectors as
-        nodes and cosine similarity as edges.
-        Pagerank algorithm is run on the graph and scores returned.
-        """
+        #алгоритм Page Rank
         cossims = cosine_similarity(sentence_vectors)
-        # cosine similarity occasionally returns negative values
-        # but pagerank doesn't work on negative values, so make them not negative.
+        
+        #рассчет косинусовой близости
+        #но алгоритм Page Rank не работает при значениях <0
+        
         cossims[cossims < 0] = 0
         nx_graph = nx.from_numpy_array(cossims)
         return nx.pagerank(nx_graph)
@@ -92,23 +88,20 @@ class SentenceTextRank:
 
             token_embeddings = torch.tensor(vector)
         except IndexError:
-            # tokens may not exist if document is empty
+            
             return None
         else:
             return token_embeddings
 
     def get_sentence_embeddings(self):
         try:
-            # if using spaCy on GPU, convert cupy arr --> numpy arr with get()
+            
             return [sent.vector.get() for sent in self.doc.sents]
         except:
             return [sent.vector for sent in self.doc.sents]
 
     def _mean_pooling(self, token_embeddings, attention_mask):
-        """Take attention mask into account for correct averaging of sentence-bert tokens"""
-        # This was adapted from a HuggingFace Model Repo example by the
-        # Sentence-Transformer team for the model used here:
-        # https://huggingface.co/sentence-transformers/paraphrase-mpnet-base-v2
+        
         input_mask_expanded = (
             attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
         )
@@ -124,19 +117,21 @@ class SentenceTextRank:
             preserve_order=True,
             return_scores=False
     ):
-        """Generate an extractive summary of the doc."""
+        
         if transformer_ranks:
             scores = self.transformer_ranks
         else:
             scores = self.wordembedding_ranks
         if scores:
-            # order by rank
+           
+            #сортировка по важности
+            
             ranked_sentences = sorted(
                 ((scores[i], i, s) for i, s in enumerate(self.sentences)), reverse=True
             )
             summary = ranked_sentences[:limit_sentences]
             if preserve_order:
-                # rerank by index in the doc
+               
                 summary = sorted(summary, key=lambda x: x[1])
             if return_scores:
                 return [(s, str(sent)) for s, i, sent in summary]
@@ -145,14 +140,9 @@ class SentenceTextRank:
         return None
 
 
-def sentence_summary_trf(text: str, nlp: Language, **kwargs) -> str:
-    """Generate a summary with a TextRank model constructed from sentences.
-
-    This version of TextRank uses the PageRank algorithm on sentence embeddings
-    (constructed SentenceBERT embeddings) and cosine similarities to
-    determine the most important sentences in the document. The highest ranked
-    sentences are extracted as the document summary.
-    """
+def sentence_summary_trf(text: str, nlp=nlp: Language, **kwargs) -> str:
+    
+    #генерация экстарктивной суммаризации
     doc = nlp(text)
     sent_tr = SentenceTextRank(doc)
     return sent_tr.generate_summary(
@@ -160,19 +150,3 @@ def sentence_summary_trf(text: str, nlp: Language, **kwargs) -> str:
     )
 
 
-text1 = "Вопросы международного правопреемства регулируются Венской конвенцией о правопреемстве государств в " \
-        "отношении договоров (1978 г.) и Венской конвенцией о правопреемстве государств в отношении государственной " \
-        "собственности, государственных архивов и государственных долгов (1983 г.). В договоре о правопреемстве в " \
-        "отношении внешнего государственного долга и активов Союза ССР от 4 декабря 1991 г. правопреемство " \
-        "определяется следующим образом: «Статья 1… в) правопреемство государств означает смену одного государства " \
-        "другим в несении ответственности за международные отношения какой-либо территории; г) " \
-        "государство-предшественник означает государство, которое было сменено другим государством в случае " \
-        "правопреемства государства; д) государство-преемник означает государство, которое сменило другое государство " \
-        "в случае правопреемства государств; е) момент правопреемства государств означает дату смены " \
-        "государством-преемником государства-предшественника в несении ответственности за международные отношения " \
-        "применительно к территории, являющейся объектом правопреемства государств…»[28]. Такое определение впервые " \
-        "было закреплено а в статье 2 Венской конвенции 1978 года. Оно также содержится в статье 2 Венской конвенции " \
-        "1983 года[29]. "
-nlp=build_classic_nlp_pipeline()
-
-print(sentence_summary_trf(text=text1, nlp=nlp))
