@@ -1,7 +1,7 @@
 from transformers import MBartForConditionalGeneration,  MBartTokenizer
 
-path1=r"C:\Users\user\Desktop\mbart_ru_sum_gazeta\tokenizer"
-path=r"C:\Users\user\Desktop\mbart_ru_sum_gazeta"
+path1=r"C:\Users\user\Desktop\mbart_sum\tokenizer"
+path=r"C:\Users\user\Desktop\mbart_sum"
 
 #обработка весов модели
 tokenizer = MBartTokenizer.from_pretrained(path1)
