@@ -2,5 +2,5 @@
 
 в данном репозитории код исходного проекта Очистка голосовых сообщений.
 - в файле bot_final.py можно найти код бота с функциями и комментариями к ним
-- в файле extractive_sum_with_PageRank.py можно найти функцию алгоритма для Extrative summarization 
+- в файле extractive_sum_with_PageRank.py можно найти алгоритм для Extrative summarization 
 - в папке abstractive_summarization можно найти файлы с обучением и применением модели, а так же ее веса
