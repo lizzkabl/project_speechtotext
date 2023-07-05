@@ -7,5 +7,7 @@
 - в файле extractive_sum_with_PageRank.py можно найти алгоритм для Extrative summarization 
 - в папке abstractive_summarization можно найти файлы с обучением и применением модели, а так же ее веса
 
-  здесь можно найти презентацию к данному проекту
+
 <h1 <a href="https://docs.google.com/presentation/d/1DI4WnABfySfZjHbluGKmFql4veC56LSX/edit?usp=sharing&ouid=115599291237726136818&rtpof=true&sd=true" target="_blank">здесь можно найти презентацию к данному проекту</a> 
+
+<img src="https://docs.google.com/presentation/d/1DI4WnABfySfZjHbluGKmFql4veC56LSX/edit?usp=sharing&ouid=115599291237726136818&rtpof=true&sd=true" alt="здесь можно найти презентацию к данному проекту">
